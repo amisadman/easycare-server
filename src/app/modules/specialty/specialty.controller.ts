@@ -25,7 +25,18 @@ const getAllSpecialty = catchAsync(async (req, res) => {
   });
 });
 
+const deleteSpecialty = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const data = await SpecialtyService.deleteSpecialty(id as string);
+  sendResponse(res, {
+    httpStatusCode: 200,
+    message: "Data deleted Successfully",
+    success: true,
+    data: data,
+  });
+});
 export const SpecialtyController = {
   createSpecialty,
   getAllSpecialty,
+  deleteSpecialty
 };
