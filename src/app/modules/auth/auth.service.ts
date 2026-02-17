@@ -5,7 +5,9 @@ import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
 import { ILoginUserPayload, IRegisterPatientPayload } from "./auth.interface";
 import { tokenUtils } from "../../utils/token";
-
+import { ms } from "ms";
+import { envVars } from "../../config";
+import { Response } from "express";
 const registerPatient = async (payload: IRegisterPatientPayload) => {
   const { name, email, password } = payload;
 
@@ -95,6 +97,17 @@ const loginUser = async (payload: ILoginUserPayload) => {
     refreshToken,
   };
 };
+
+const setAccessTokenCookie = (res: Response, accessToken: string) => {
+  const maxAge = Number(ms(envVars.ACCESS_TOKEN_EXPIRATION));
+  return res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: maxAge,
+  });
+};
+
 
 export const AuthService = {
   registerPatient,
