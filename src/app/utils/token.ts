@@ -19,3 +19,8 @@ const getRefreshToken = (payload: JwtPayload) => {
   );
   return refreshToken;
 };
+
+export const tokenUtils = {
+    getAccessToken,
+    getRefreshToken,
+}
