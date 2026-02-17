@@ -1,4 +1,6 @@
+import status from "http-status";
 import { UserStatus } from "../../../generated/prisma/enums";
+import AppError from "../../errorsHelpers/AppError";
 import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
 import { ILoginUserPayload, IRegisterPatientPayload } from "./auth.interface";
@@ -17,7 +19,8 @@ const registerPatient = async (payload: IRegisterPatientPayload) => {
   });
 
   if (!data.user) {
-    throw new Error("Failed to register patient");
+    // throw new Error("Failed to register patient");
+    throw new AppError(status.INTERNAL_SERVER_ERROR, "Failed to register patient"); 
   }
   try {
     const patient = await prisma.$transaction((tx) => {
@@ -57,11 +60,13 @@ const loginUser = async (payload: ILoginUserPayload) => {
   });
 
   if (data.user.status === UserStatus.BLOCKED) {
-    throw new Error("User is blocked");
+    // throw new Error("User is blocked");
+    throw new AppError(status.FORBIDDEN, "User is blocked");
   }
 
   if (data.user.isDeleted || data.user.status === UserStatus.DELETED) {
-    throw new Error("User is deleted");
+    // throw new Error("User is deleted");
+    throw new AppError(status.FORBIDDEN, "User is deleted");
   }
   return data;
 };
