@@ -107,9 +107,20 @@ const setAccessTokenCookie = (res: Response, accessToken: string) => {
     maxAge: maxAge,
   });
 };
-
+const setRefreshTokenCookie = (res: Response, refreshToken: string) => {
+  const maxAge = Number(ms(envVars.REFRESH_TOKEN_EXPIRATION));
+  return res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: maxAge,
+    path:"/"
+  });
+};
 
 export const AuthService = {
   registerPatient,
   loginUser,
+  setAccessTokenCookie,
+  setRefreshTokenCookie,
 };
