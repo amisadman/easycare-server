@@ -7,11 +7,15 @@ interface EnvConfig {
   PORT: string;
   BETTER_AUTH_URL: string;
   DATABASE_URL: string;
-  NODE_ENV: string
+  NODE_ENV: string;
+  ACCESS_TOKEN_SECRET: string;
+  REFRESH_TOKEN_SECRET: string;
+  ACCESS_TOKEN_EXPIRATION: string;
+  REFRESH_TOKEN_EXPIRATION: string;
 }
 
 const loadEnvVariables = (): EnvConfig => {
-  const requireEnvVariable = ["PORT", "BETTER_AUTH_URL", "DATABASE_URL","NODE_ENV"];
+  const requireEnvVariable = ["PORT", "BETTER_AUTH_URL", "DATABASE_URL","NODE_ENV", "ACCESS_TOKEN_SECRET", "REFRESH_TOKEN_SECRET", "ACCESS_TOKEN_EXPIRATION", "REFRESH_TOKEN_EXPIRATION"];
   requireEnvVariable.forEach((variable) => {
     if (!process.env[variable]) {
       // throw new Error(
@@ -25,7 +29,11 @@ const loadEnvVariables = (): EnvConfig => {
     PORT: process.env.PORT as string,
     BETTER_AUTH_URL: process.env.BETTER_AUTH_URL as string,
     DATABASE_URL: process.env.DATABASE_URL as string,
-    NODE_ENV: process.env.NODE_ENV as string
+    NODE_ENV: process.env.NODE_ENV as string,
+    ACCESS_TOKEN_SECRET: process.env.ACCESS_TOKEN_SECRET as string,
+    REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET as string,
+    ACCESS_TOKEN_EXPIRATION: process.env.ACCESS_TOKEN_EXPIRATION as string,
+    REFRESH_TOKEN_EXPIRATION: process.env.REFRESH_TOKEN_EXPIRATION as string,
   };
 };
 
