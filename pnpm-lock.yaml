@@ -38,9 +38,6 @@ importers:
       http-status-code:
         specifier: ^2.1.0
         version: 2.1.0
-      jsonwebtoken:
-        specifier: ^9.0.3
-        version: 9.0.3
       pg:
         specifier: ^8.18.0
         version: 8.18.0
@@ -75,6 +72,9 @@ importers:
       eslint:
         specifier: ^10.0.0
         version: 10.0.0(jiti@2.6.1)
+      jsonwebtoken:
+        specifier: ^9.0.3
+        version: 9.0.3
       prettier:
         specifier: ^3.8.1
         version: 3.8.1
