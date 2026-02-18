@@ -5,7 +5,6 @@ import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
 import { ILoginUserPayload, IRegisterPatientPayload } from "./auth.interface";
 import { tokenUtils } from "../../utils/token";
-import { ms } from "ms";
 import { envVars } from "../../config";
 import { Response } from "express";
 const registerPatient = async (payload: IRegisterPatientPayload) => {
@@ -37,10 +36,31 @@ const registerPatient = async (payload: IRegisterPatientPayload) => {
       });
       return patientTx;
     });
-    return {
-      ...data,
-      patient,
-    };
+     const accessToken = tokenUtils.getAccessToken({
+    userId: data.user.id,
+    role: data.user.role,
+    name: data.user.name,
+    email: data.user.email,
+    status: data.user.status,
+    isDeleted: data.user.isDeleted,
+    emailVerified: data.user.emailVerified,
+  });
+
+  const refreshToken = tokenUtils.getRefreshToken({
+    userId: data.user.id,
+    role: data.user.role,
+    name: data.user.name,
+    email: data.user.email,
+    status: data.user.status,
+    isDeleted: data.user.isDeleted,
+    emailVerified: data.user.emailVerified,
+  });
+  return {
+    ...data,
+    accessToken,
+    refreshToken,
+    patient,
+  };
   } catch (error) {
     console.log("Transaction error : ", error);
     await prisma.user.delete({
@@ -98,29 +118,8 @@ const loginUser = async (payload: ILoginUserPayload) => {
   };
 };
 
-const setAccessTokenCookie = (res: Response, accessToken: string) => {
-  const maxAge = Number(ms(envVars.ACCESS_TOKEN_EXPIRATION));
-  return res.cookie("accessToken", accessToken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-    maxAge: maxAge,
-  });
-};
-const setRefreshTokenCookie = (res: Response, refreshToken: string) => {
-  const maxAge = Number(ms(envVars.REFRESH_TOKEN_EXPIRATION));
-  return res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
-    maxAge: maxAge,
-    path:"/"
-  });
-};
 
 export const AuthService = {
   registerPatient,
   loginUser,
-  setAccessTokenCookie,
-  setRefreshTokenCookie,
 };

@@ -12,10 +12,11 @@ interface EnvConfig {
   REFRESH_TOKEN_SECRET: string;
   ACCESS_TOKEN_EXPIRATION: string;
   REFRESH_TOKEN_EXPIRATION: string;
+  BETTER_AUTH_COOKIE_EXPIRATION: string;
 }
 
 const loadEnvVariables = (): EnvConfig => {
-  const requireEnvVariable = ["PORT", "BETTER_AUTH_URL", "DATABASE_URL","NODE_ENV", "ACCESS_TOKEN_SECRET", "REFRESH_TOKEN_SECRET", "ACCESS_TOKEN_EXPIRATION", "REFRESH_TOKEN_EXPIRATION"];
+  const requireEnvVariable = ["PORT", "BETTER_AUTH_URL", "DATABASE_URL","NODE_ENV", "ACCESS_TOKEN_SECRET", "REFRESH_TOKEN_SECRET", "ACCESS_TOKEN_EXPIRATION", "REFRESH_TOKEN_EXPIRATION", "BETTER_AUTH_COOKIE_EXPIRATION"];
   requireEnvVariable.forEach((variable) => {
     if (!process.env[variable]) {
       // throw new Error(
@@ -34,6 +35,7 @@ const loadEnvVariables = (): EnvConfig => {
     REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET as string,
     ACCESS_TOKEN_EXPIRATION: process.env.ACCESS_TOKEN_EXPIRATION as string,
     REFRESH_TOKEN_EXPIRATION: process.env.REFRESH_TOKEN_EXPIRATION as string,
+    BETTER_AUTH_COOKIE_EXPIRATION: process.env.BETTER_AUTH_COOKIE_EXPIRATION as string,
   };
 };
 
