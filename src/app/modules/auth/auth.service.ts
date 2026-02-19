@@ -3,7 +3,11 @@ import { UserStatus } from "../../../generated/prisma/enums";
 import AppError from "../../errorsHelpers/AppError";
 import { auth } from "../../lib/auth";
 import { prisma } from "../../lib/prisma";
-import { ILoginUserPayload, IRegisterPatientPayload } from "./auth.interface";
+import {
+  IChangePasswordPayload,
+  ILoginUserPayload,
+  IRegisterPatientPayload,
+} from "./auth.interface";
 import { tokenUtils } from "../../utils/token";
 import { envVars } from "../../config";
 import { Response } from "express";
@@ -159,7 +163,6 @@ const getNewToken = async (sessionToken: string, refreshToken: string) => {
     },
   });
 
-
   if (!sessionExists) {
     throw new AppError(status.UNAUTHORIZED, "No Session found!!!");
   }
@@ -173,7 +176,7 @@ const getNewToken = async (sessionToken: string, refreshToken: string) => {
     throw new AppError(status.UNAUTHORIZED, "Refresh Token not found");
   }
   const data = varifiedRefreshToken.data as JwtPayload;
-  console.log("this is data" ,data);
+  console.log("this is data", data);
 
   const newAccessToken = tokenUtils.getAccessToken({
     userId: data.userId,
@@ -186,7 +189,7 @@ const getNewToken = async (sessionToken: string, refreshToken: string) => {
   });
 
   const newRefreshToken = tokenUtils.getRefreshToken({
-      userId: data.userId,
+    userId: data.userId,
     role: data.role,
     name: data.name,
     email: data.email,
@@ -212,9 +215,74 @@ const getNewToken = async (sessionToken: string, refreshToken: string) => {
   };
 };
 
+const changePassword = async (
+  payload: IChangePasswordPayload,
+  sessionToken: string,
+) => {
+  const session = await auth.api.getSession({
+    headers: new Headers({
+      Authorization: `Bearer ${sessionToken}`,
+    }),
+  });
+
+  if (!session) {
+    throw new AppError(status.UNAUTHORIZED, "Session Not Found!!!");
+  }
+
+  const { currentPassword, newPassword } = payload;
+
+  const data = await auth.api.changePassword({
+    body: {
+      currentPassword,
+      newPassword,
+      revokeOtherSessions: true,
+    },
+    headers: new Headers({
+      Authorization: `Bearer ${sessionToken}`,
+    }),
+  });
+
+  const accessToken = tokenUtils.getAccessToken({
+    userId: data.user.id,
+    role: data.user.role,
+    name: data.user.name,
+    email: data.user.email,
+    status: data.user.status,
+    isDeleted: data.user.isDeleted,
+    emailVerified: data.user.emailVerified,
+  });
+
+  const refreshToken = tokenUtils.getRefreshToken({
+    userId: data.user.id,
+    role: data.user.role,
+    name: data.user.name,
+    email: data.user.email,
+    status: data.user.status,
+    isDeleted: data.user.isDeleted,
+    emailVerified: data.user.emailVerified,
+  });
+
+  return {
+    accessToken,
+    refreshToken,
+    ...data,
+  };
+};
+
+const logout = async(sessionToken : string) =>{
+  const result = await auth.api.signOut({
+    headers : new Headers({
+      Authorization: `Bearer ${sessionToken}`
+    })
+  })
+  return result;
+}
+
 export const AuthService = {
   registerPatient,
   loginUser,
   getMe,
-  getNewToken
+  getNewToken,
+  changePassword,
+  logout
 };

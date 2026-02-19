@@ -6,6 +6,7 @@ import { tokenUtils } from "../../utils/token";
 import { cookieUtils } from "../../utils/cookie";
 import AppError from "../../errorsHelpers/AppError";
 import status from "http-status";
+import { IChangePasswordPayload } from "./auth.interface";
 
 const registerPatient = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;
@@ -20,7 +21,7 @@ const registerPatient = catchAsync(async (req: Request, res: Response) => {
   tokenUtils.setBetterAuthSessionCookie(res, token as string);
 
   sendResponse(res, {
-    httpStatusCode: 201,
+    httpStatusCode: status.CREATED,
     success: true,
     message: "Patient registered successfully",
     data: {
@@ -38,7 +39,7 @@ const getMe = catchAsync(async (req: Request, res: Response) => {
   const result = await AuthService.getMe(user.id);
 
   sendResponse(res, {
-    httpStatusCode: 200,
+    httpStatusCode: status.OK,
     success: true,
     message: "User retrieved successfully",
     data: {
@@ -97,9 +98,61 @@ const getNewToken = catchAsync(
   },
 );
 
+const changePassword = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const payload: IChangePasswordPayload = req.body;
+    const sessionToken = cookieUtils.getCookie(
+      req,
+      "better-auth.session_token",
+    );
+
+    const result = await AuthService.changePassword(payload, sessionToken);
+    const { accessToken, refreshToken, token } = result;
+    tokenUtils.setAccessTokenCookie(res, accessToken);
+    tokenUtils.setRefreshTokenCookie(res, refreshToken);
+    tokenUtils.setBetterAuthSessionCookie(res, token as string);
+    sendResponse(res, {
+      httpStatusCode: status.OK,
+      success: true,
+      message: "Password Changed successfully",
+      data: {
+        ...result,
+      },
+    });
+  },
+);
+
+const logout = catchAsync(async (req: Request, res: Response) => {
+  const sessionToken = cookieUtils.getCookie(req, "better-auth.session_token");
+  const result = await AuthService.logout(sessionToken);
+
+  cookieUtils.clearCookie(res, "accessToken", {
+    httpOnly: true,
+    sameSite: "none",
+    secure: true,
+  });
+  cookieUtils.clearCookie(res, "refreshToken", {
+    httpOnly: true,
+    sameSite: "none",
+    secure: true,
+  });
+  cookieUtils.clearCookie(res, "better-auth.session_token", {
+    httpOnly: true,
+    sameSite: "none",
+    secure: true,
+  });
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    data: result,
+  });
+});
 export const AuthController = {
   registerPatient,
   loginUser,
   getMe,
-  getNewToken
+  getNewToken,
+  changePassword,
+  logout,
 };

@@ -13,16 +13,39 @@ interface EnvConfig {
   ACCESS_TOKEN_EXPIRATION: string;
   REFRESH_TOKEN_EXPIRATION: string;
   BETTER_AUTH_COOKIE_EXPIRATION: string;
+  EMAIL_SENDER_SMTP_USER: string;
+  EMAIL_SENDER_SMTP_PASS: string;
+  EMAIL_SENDER_SMTP_PORT: string;
+  EMAIL_SENDER_SMTP_HOST: string;
+  EMAIL_SENDER_SMTP_FROM: string;
 }
 
 const loadEnvVariables = (): EnvConfig => {
-  const requireEnvVariable = ["PORT", "BETTER_AUTH_URL", "DATABASE_URL","NODE_ENV", "ACCESS_TOKEN_SECRET", "REFRESH_TOKEN_SECRET", "ACCESS_TOKEN_EXPIRATION", "REFRESH_TOKEN_EXPIRATION", "BETTER_AUTH_COOKIE_EXPIRATION"];
+  const requireEnvVariable = [
+    "PORT",
+    "BETTER_AUTH_URL",
+    "DATABASE_URL",
+    "NODE_ENV",
+    "ACCESS_TOKEN_SECRET",
+    "REFRESH_TOKEN_SECRET",
+    "ACCESS_TOKEN_EXPIRATION",
+    "REFRESH_TOKEN_EXPIRATION",
+    "BETTER_AUTH_COOKIE_EXPIRATION",
+    "EMAIL_SENDER_SMTP_USER",
+    "EMAIL_SENDER_SMTP_FROM",
+    "EMAIL_SENDER_SMTP_PASS",
+    "EMAIL_SENDER_SMTP_HOST",
+    "EMAIL_SENDER_SMTP_PORT",
+  ];
   requireEnvVariable.forEach((variable) => {
     if (!process.env[variable]) {
       // throw new Error(
       //   `Environment variable ${variable} is required but not set in .env file.`,
       // );
-      throw new AppError(status.INTERNAL_SERVER_ERROR, `Environment variable ${variable} is required but not set in .env file.`);
+      throw new AppError(
+        status.INTERNAL_SERVER_ERROR,
+        `Environment variable ${variable} is required but not set in .env file.`,
+      );
     }
   });
 
@@ -35,7 +58,13 @@ const loadEnvVariables = (): EnvConfig => {
     REFRESH_TOKEN_SECRET: process.env.REFRESH_TOKEN_SECRET as string,
     ACCESS_TOKEN_EXPIRATION: process.env.ACCESS_TOKEN_EXPIRATION as string,
     REFRESH_TOKEN_EXPIRATION: process.env.REFRESH_TOKEN_EXPIRATION as string,
-    BETTER_AUTH_COOKIE_EXPIRATION: process.env.BETTER_AUTH_COOKIE_EXPIRATION as string,
+    BETTER_AUTH_COOKIE_EXPIRATION: process.env
+      .BETTER_AUTH_COOKIE_EXPIRATION as string,
+    EMAIL_SENDER_SMTP_USER: process.env.EMAIL_SENDER_SMTP_USER as string,
+    EMAIL_SENDER_SMTP_FROM: process.env.EMAIL_SENDER_SMTP_FROM as string,
+    EMAIL_SENDER_SMTP_PASS: process.env.EMAIL_SENDER_SMTP_PASS as string,
+    EMAIL_SENDER_SMTP_HOST: process.env.EMAIL_SENDER_SMTP_HOST as string,
+    EMAIL_SENDER_SMTP_PORT: process.env.EMAIL_SENDER_SMTP_PORT as string,
   };
 };
 
