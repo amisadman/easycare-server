@@ -6,7 +6,7 @@ import { tokenUtils } from "../../utils/token";
 import { cookieUtils } from "../../utils/cookie";
 import AppError from "../../errorsHelpers/AppError";
 import status from "http-status";
-import { IChangePasswordPayload } from "./auth.interface";
+import { IChangePasswordPayload, IVerifyEmailPayload } from "./auth.interface";
 
 const registerPatient = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;
@@ -148,6 +148,19 @@ const logout = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+const verifyEmail = catchAsync(async (req: Request, res: Response) => {
+
+  const payload : IVerifyEmailPayload = req.body;
+
+  await AuthService.varifyEmail(payload);
+
+  sendResponse(res, {
+    httpStatusCode: status.OK,
+    success: true,
+    message: "Email verified successfully",
+  });
+});
 export const AuthController = {
   registerPatient,
   loginUser,
@@ -155,4 +168,5 @@ export const AuthController = {
   getNewToken,
   changePassword,
   logout,
+  verifyEmail
 };

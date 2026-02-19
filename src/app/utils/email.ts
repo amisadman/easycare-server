@@ -27,7 +27,7 @@ interface ISendEmailOptions {
   }[];
 }
 
-const sendEmail = async ({
+export const sendEmail = async ({
   subject,
   templateData,
   templateName,

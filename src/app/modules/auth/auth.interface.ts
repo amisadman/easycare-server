@@ -1,3 +1,5 @@
+import { email } from "zod";
+
 export interface IRegisterPatientPayload {
   name: string;
   email: string;
@@ -12,4 +14,9 @@ export interface ILoginUserPayload {
 export interface IChangePasswordPayload{
   currentPassword :string;
   newPassword: string;
+}
+
+export interface IVerifyEmailPayload {
+  email: string;
+  otp: string;
 }

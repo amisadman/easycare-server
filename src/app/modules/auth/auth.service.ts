@@ -7,12 +7,14 @@ import {
   IChangePasswordPayload,
   ILoginUserPayload,
   IRegisterPatientPayload,
+  IVerifyEmailPayload,
 } from "./auth.interface";
 import { tokenUtils } from "../../utils/token";
 import { envVars } from "../../config";
 import { Response } from "express";
 import { jwtUtils } from "../../utils/jwt";
 import { JwtPayload } from "jsonwebtoken";
+import { verifyEmail } from "better-auth/api";
 const registerPatient = async (payload: IRegisterPatientPayload) => {
   const { name, email, password } = payload;
 
@@ -269,14 +271,35 @@ const changePassword = async (
   };
 };
 
-const logout = async(sessionToken : string) =>{
+const logout = async (sessionToken: string) => {
   const result = await auth.api.signOut({
-    headers : new Headers({
-      Authorization: `Bearer ${sessionToken}`
-    })
-  })
+    headers: new Headers({
+      Authorization: `Bearer ${sessionToken}`,
+    }),
+  });
   return result;
-}
+};
+
+const varifyEmail = async (payload : IVerifyEmailPayload) => {
+
+  const {email,otp} = payload;
+  const result = await auth.api.verifyEmailOTP({
+    body: {
+      email,
+      otp,
+    },
+  });
+  if (result.status && !result.user.emailVerified) {
+    await prisma.user.update({
+      where: {
+        email,
+      },
+      data: {
+        emailVerified: true,
+      },
+    });
+  }
+};
 
 export const AuthService = {
   registerPatient,
@@ -284,5 +307,6 @@ export const AuthService = {
   getMe,
   getNewToken,
   changePassword,
-  logout
+  logout,
+  varifyEmail
 };
