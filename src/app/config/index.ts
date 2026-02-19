@@ -20,7 +20,10 @@ interface EnvConfig {
   EMAIL_SENDER_SMTP_FROM: string;
   GOOGLE_CLIENT_SECRET: string;
   GOOGLE_CLIENT_ID: string;
-  FRONTEND_URL:string
+  FRONTEND_URL: string;
+  CLOUDINARY_API_SECRET: string;
+  CLOUDINARY_API_KEY: string;
+  CLOUDINARY_CLOUD: string;
 }
 
 const loadEnvVariables = (): EnvConfig => {
@@ -41,7 +44,10 @@ const loadEnvVariables = (): EnvConfig => {
     "EMAIL_SENDER_SMTP_PORT",
     "GOOGLE_CLIENT_SECRET",
     "GOOGLE_CLIENT_ID",
-    "FRONTEND_URL"
+    "FRONTEND_URL",
+    "CLOUDINARY_API_SECRET",
+    "CLOUDINARY_API_KEY",
+    "CLOUDINARY_CLOUD",
   ];
   requireEnvVariable.forEach((variable) => {
     if (!process.env[variable]) {
@@ -71,10 +77,12 @@ const loadEnvVariables = (): EnvConfig => {
     EMAIL_SENDER_SMTP_PASS: process.env.EMAIL_SENDER_SMTP_PASS as string,
     EMAIL_SENDER_SMTP_HOST: process.env.EMAIL_SENDER_SMTP_HOST as string,
     EMAIL_SENDER_SMTP_PORT: process.env.EMAIL_SENDER_SMTP_PORT as string,
-    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string, 
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
-    FRONTEND_URL: process.env.FRONTEND_URL as string
-
+    FRONTEND_URL: process.env.FRONTEND_URL as string,
+    CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET as string,
+    CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
+    CLOUDINARY_CLOUD: process.env.CLOUDINARY_CLOUD as string,
   };
 };
 
