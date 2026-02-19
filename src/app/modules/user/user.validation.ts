@@ -1,5 +1,6 @@
 import z from "zod";
 import { Gender } from "../../../generated/prisma/enums";
+import { profile } from "node:console";
 
 export const createDoctorValidation = z.object({
   password: z
@@ -59,4 +60,97 @@ export const createDoctorValidation = z.object({
   specialties: z
     .array(z.uuid(), "Specialties must be an array of strings")
     .min(1, "At least one specialty is required"),
+});
+
+export const createAdminValidation = z.object({
+  body: z.object({
+    password: z
+      .string("Password is required")
+      .min(6, "Password must be at least 6 characters")
+      .max(20, "Password must be at most 20 characters"),
+    admin: z.object({
+      name: z
+        .string("Name is required and must be string")
+        .min(5, "Name must be at least 5 characters")
+        .max(30, "Name must be at most 30 characters"),
+      email: z.email("Invalid email address"),
+      contactNumber: z
+        .string("Contact number is required")
+        .min(11, "Contact number must be at least 11 characters")
+        .max(14, "Contact number must be at most 15 characters")
+        .optional(),
+      profilePhoto: z.url("Invalid URL for profile photo").optional(),
+    }),
+  }),
+});
+
+export const createSuperAdminValidation = z.object({
+  body: z.object({
+    password: z
+      .string("Password is required")
+      .min(6, "Password must be at least 6 characters")
+      .max(20, "Password must be at most 20 characters"),
+    superAdmin: z.object({
+      name: z
+        .string("Name is required and must be string")
+        .min(5, "Name must be at least 5 characters")
+        .max(30, "Name must be at most 30 characters"),
+      email: z.email("Invalid email address"),
+      contactNumber: z
+        .string("Contact number is required")
+        .min(11, "Contact number must be at least 11 characters")
+        .max(14, "Contact number must be at most 15 characters")
+        .optional(),
+      profilePhoto: z.url("Invalid URL for profile photo").optional(),
+    }),
+  }),
+});
+
+
+
+export const updateAdminValidation = z.object({
+  body: z.object({
+    password: z
+      .string("Password is required")
+      .min(6, "Password must be at least 6 characters")
+      .max(20, "Password must be at most 20 characters")
+      .optional(),
+    admin: z.object({
+      name: z
+        .string("Name is required and must be string")
+        .min(5, "Name must be at least 5 characters")
+        .max(30, "Name must be at most 30 characters")
+        .optional(),
+      email: z.email("Invalid email address").optional(),
+      contactNumber: z
+        .string("Contact number is required")
+        .min(11, "Contact number must be at least 11 characters")
+        .max(14, "Contact number must be at most 15 characters")
+        .optional(),
+      profilePhoto: z.url("Invalid URL for profile photo").optional(),
+    }),
+  }),
+});
+
+export const updateSuperAdminValidation = z.object({
+  body: z.object({
+    password: z
+      .string("Password is required")
+      .min(6, "Password must be at least 6 characters")
+      .max(20, "Password must be at most 20 characters")
+      .optional(),
+    superAdmin: z.object({
+      name: z
+        .string("Name is required and must be string")
+        .min(5, "Name must be at least 5 characters")
+        .max(30, "Name must be at most 30 characters"),
+      email: z.email("Invalid email address").optional(),
+      contactNumber: z
+        .string("Contact number is required")
+        .min(11, "Contact number must be at least 11 characters")
+        .max(14, "Contact number must be at most 15 characters")
+        .optional(),
+      profilePhoto: z.url("Invalid URL for profile photo").optional(),
+    }),
+  }),
 });

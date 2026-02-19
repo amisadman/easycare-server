@@ -1,9 +1,10 @@
 import { Role, Specialty } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
-import { ICreateDoctorPayload } from "./user.interface";
+import { ICreateAdminPayload, ICreateDoctorPayload } from "./user.interface";
 import { auth } from "../../lib/auth";
 import AppError from "../../errorsHelpers/AppError";
 import status from "http-status";
+import { create } from "node:domain";
 
 const createDoctor = async (payload: ICreateDoctorPayload) => {
   const specialties: Specialty[] = [];
@@ -15,7 +16,10 @@ const createDoctor = async (payload: ICreateDoctorPayload) => {
     });
     if (!specialty) {
       // throw new Error(`Specialty with id ${specialtyId} not found`);
-      throw new AppError(status.NOT_FOUND, `Specialty with id ${specialtyId} not found`);
+      throw new AppError(
+        status.NOT_FOUND,
+        `Specialty with id ${specialtyId} not found`,
+      );
     }
     specialties.push(specialty);
   }
@@ -27,7 +31,10 @@ const createDoctor = async (payload: ICreateDoctorPayload) => {
   });
   if (existingUser) {
     // throw new Error(`User with email ${payload.doctor.email} already exists`);
-    throw new AppError(status.CONFLICT, `User with email ${payload.doctor.email} already exists`);
+    throw new AppError(
+      status.CONFLICT,
+      `User with email ${payload.doctor.email} already exists`,
+    );
   }
 
   const userData = await auth.api.signUpEmail({
@@ -117,7 +124,51 @@ const createDoctor = async (payload: ICreateDoctorPayload) => {
   }
 };
 
+const createAdmin = async (payload: ICreateAdminPayload) => {
+  //TODO: Validate who is creating the admin user. Only super admin can create admin user and only super admin can create super admin user but admin user cannot create super admin user
+
+  const userExists = await prisma.user.findUnique({
+    where: {
+      email: payload.admin.email,
+    },
+  });
+
+  if (userExists) {
+    throw new AppError(status.CONFLICT, "User with this email already exists");
+  }
+
+  const { admin, role, password } = payload;
+
+  const userData = await auth.api.signUpEmail({
+    body: {
+      ...admin,
+      password,
+      role,
+      needPasswordChange: true,
+    },
+  });
+
+  try {
+    const adminData = await prisma.admin.create({
+      data: {
+        userId: userData.user.id,
+        ...admin,
+      },
+    });
+
+    return adminData;
+  } catch (error: any) {
+    console.log("Error creating admin: ", error);
+    await prisma.user.delete({
+      where: {
+        id: userData.user.id,
+      },
+    });
+    throw error;
+  }
+};
 
 export const UserService = {
   createDoctor,
+  createAdmin,
 };
