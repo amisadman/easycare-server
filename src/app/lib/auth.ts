@@ -15,6 +15,23 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  socialProviders: {
+    google: {
+      clientId: envVars.GOOGLE_CLIENT_ID,
+      clientSecret: envVars.GOOGLE_CLIENT_SECRET,
+      // callbackUrl: envVars.GOOGLE_CALLBACK_URL,
+      mapProfileToUser: () => {
+        return {
+          role: Role.PATIENT,
+          status: UserStatus.ACTIVE,
+          needPasswordChange: false,
+          emailVerified: true,
+          isDeleted: false,
+          deletedAt: null,
+        };
+      },
+    },
+  },
 
   user: {
     additionalFields: {
@@ -54,6 +71,13 @@ export const auth = betterAuth({
     sendOnSignIn: true,
     autoSignInAfterVerification: true,
   },
+  redirectURLs: {
+    signIn: `${envVars.BETTER_AUTH_URL}/api/v1/auth/google/success`,
+  },
+  trustedOrigins: [
+    process.env.BETTER_AUTH_URL || "http://localhost:5000",
+    envVars.FRONTEND_URL,
+  ],
   plugins: [
     bearer(),
     emailOTP({
@@ -108,6 +132,28 @@ export const auth = betterAuth({
     cookieCache: {
       enabled: true,
       maxAge: 60 * 60 * 60 * 24,
+    },
+  },
+  advanced: {
+    // disableCSRFCheck: true,
+    useSecureCookies: false,
+    cookies: {
+      state: {
+        attributes: {
+          sameSite: "none",
+          secure: true,
+          httpOnly: true,
+          path: "/",
+        },
+      },
+      sessionToken: {
+        attributes: {
+          sameSite: "none",
+          secure: true,
+          httpOnly: true,
+          path: "/",
+        },
+      },
     },
   },
 });

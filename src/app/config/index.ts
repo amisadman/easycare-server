@@ -18,6 +18,9 @@ interface EnvConfig {
   EMAIL_SENDER_SMTP_PORT: string;
   EMAIL_SENDER_SMTP_HOST: string;
   EMAIL_SENDER_SMTP_FROM: string;
+  GOOGLE_CLIENT_SECRET: string;
+  GOOGLE_CLIENT_ID: string;
+  FRONTEND_URL:string
 }
 
 const loadEnvVariables = (): EnvConfig => {
@@ -36,6 +39,9 @@ const loadEnvVariables = (): EnvConfig => {
     "EMAIL_SENDER_SMTP_PASS",
     "EMAIL_SENDER_SMTP_HOST",
     "EMAIL_SENDER_SMTP_PORT",
+    "GOOGLE_CLIENT_SECRET",
+    "GOOGLE_CLIENT_ID",
+    "FRONTEND_URL"
   ];
   requireEnvVariable.forEach((variable) => {
     if (!process.env[variable]) {
@@ -65,6 +71,10 @@ const loadEnvVariables = (): EnvConfig => {
     EMAIL_SENDER_SMTP_PASS: process.env.EMAIL_SENDER_SMTP_PASS as string,
     EMAIL_SENDER_SMTP_HOST: process.env.EMAIL_SENDER_SMTP_HOST as string,
     EMAIL_SENDER_SMTP_PORT: process.env.EMAIL_SENDER_SMTP_PORT as string,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string, 
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
+    FRONTEND_URL: process.env.FRONTEND_URL as string
+
   };
 };
 
