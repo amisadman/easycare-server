@@ -5,6 +5,7 @@ import z, { success } from "zod";
 import { IErrorResponse, IErrorSources } from "../interface/error.interface";
 import { handleZodError } from "../errorsHelpers/handleZodError";
 import { stat } from "node:fs";
+import { deleteFileFromCloudinary } from "../config/cloudinary.config";
 
 export const globalErrorHandler = async (
   err: any,
@@ -14,6 +15,9 @@ export const globalErrorHandler = async (
 ) => {
   if (envVars.NODE_ENV === "development") {
     console.log("Error from Global Error Handler", err);
+  }
+  if(req.file){
+    await deleteFileFromCloudinary(req.file.path);
   }
 
   let errorSources: IErrorSources[] = [];

@@ -29,6 +29,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
+app.use(express.urlencoded({extended: true}))
 app.use("/api/auth", toNodeHandler(auth));
 
 app.use("/api/v1", IndexRoutes);

@@ -3,6 +3,7 @@ import { sendResponse } from "../../shared/sendResponse";
 import { SpecialtyService } from "./specialty.service";
 
 const createSpecialty = catchAsync(async (req, res, next) => {
+  req.body.icon = req.file?.path;
   const payload = req.body;
   const data = await SpecialtyService.createSpecialty(payload);
 
@@ -38,5 +39,5 @@ const deleteSpecialty = catchAsync(async (req, res) => {
 export const SpecialtyController = {
   createSpecialty,
   getAllSpecialty,
-  deleteSpecialty
+  deleteSpecialty,
 };
