@@ -35,6 +35,7 @@ export const checkAuth =
             user: true,
           },
         });
+        console.log("Session exists:", sessionExists);
 
         if (sessionExists && sessionExists.user) {
           const user = sessionExists.user;
@@ -69,10 +70,7 @@ export const checkAuth =
             );
           }
 
-          if (
-            allowedRoles.length > 0 &&
-            !allowedRoles.includes(user.role)
-          ) {
+          if (allowedRoles.length > 0 && !allowedRoles.includes(user.role)) {
             throw new AppError(
               status.FORBIDDEN,
               "Forbidden access! You do not have permission to access this resource.",
@@ -86,8 +84,17 @@ export const checkAuth =
               "Unauthorized access! No access token provided.",
             );
           }
+
+          
+          req.user = {
+            id: user.id,
+            email: user.email,
+            role: user.role,
+          };
+          
         }
       }
+
       const accessToken = cookieUtils.getCookie(req, "accessToken");
 
       if (!accessToken) {

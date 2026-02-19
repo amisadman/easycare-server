@@ -7,6 +7,8 @@ import { ILoginUserPayload, IRegisterPatientPayload } from "./auth.interface";
 import { tokenUtils } from "../../utils/token";
 import { envVars } from "../../config";
 import { Response } from "express";
+import { jwtUtils } from "../../utils/jwt";
+import { JwtPayload } from "jsonwebtoken";
 const registerPatient = async (payload: IRegisterPatientPayload) => {
   const { name, email, password } = payload;
 
@@ -36,31 +38,31 @@ const registerPatient = async (payload: IRegisterPatientPayload) => {
       });
       return patientTx;
     });
-     const accessToken = tokenUtils.getAccessToken({
-    userId: data.user.id,
-    role: data.user.role,
-    name: data.user.name,
-    email: data.user.email,
-    status: data.user.status,
-    isDeleted: data.user.isDeleted,
-    emailVerified: data.user.emailVerified,
-  });
+    const accessToken = tokenUtils.getAccessToken({
+      userId: data.user.id,
+      role: data.user.role,
+      name: data.user.name,
+      email: data.user.email,
+      status: data.user.status,
+      isDeleted: data.user.isDeleted,
+      emailVerified: data.user.emailVerified,
+    });
 
-  const refreshToken = tokenUtils.getRefreshToken({
-    userId: data.user.id,
-    role: data.user.role,
-    name: data.user.name,
-    email: data.user.email,
-    status: data.user.status,
-    isDeleted: data.user.isDeleted,
-    emailVerified: data.user.emailVerified,
-  });
-  return {
-    ...data,
-    accessToken,
-    refreshToken,
-    patient,
-  };
+    const refreshToken = tokenUtils.getRefreshToken({
+      userId: data.user.id,
+      role: data.user.role,
+      name: data.user.name,
+      email: data.user.email,
+      status: data.user.status,
+      isDeleted: data.user.isDeleted,
+      emailVerified: data.user.emailVerified,
+    });
+    return {
+      ...data,
+      accessToken,
+      refreshToken,
+      patient,
+    };
   } catch (error) {
     console.log("Transaction error : ", error);
     await prisma.user.delete({
@@ -118,8 +120,101 @@ const loginUser = async (payload: ILoginUserPayload) => {
   };
 };
 
+const getMe = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    include: {
+      patient: {
+        include: {
+          appointments: true,
+          reviews: true,
+          prescriptions: true,
+          medicalReports: true,
+          patientHealthData: true,
+        },
+      },
+      doctor: {
+        include: {
+          specialties: true,
+          appointments: true,
+          reviews: true,
+          prescriptions: true,
+        },
+      },
+      admin: true,
+    },
+  });
+  return user;
+};
+
+const getNewToken = async (sessionToken: string, refreshToken: string) => {
+  const sessionExists = await prisma.session.findUnique({
+    where: {
+      token: sessionToken,
+    },
+    include: {
+      user: true,
+    },
+  });
+
+
+  if (!sessionExists) {
+    throw new AppError(status.UNAUTHORIZED, "No Session found!!!");
+  }
+
+  const varifiedRefreshToken = jwtUtils.verifyToken(
+    refreshToken,
+    envVars.REFRESH_TOKEN_SECRET,
+  );
+
+  if (!varifiedRefreshToken.success && varifiedRefreshToken.error) {
+    throw new AppError(status.UNAUTHORIZED, "Refresh Token not found");
+  }
+  const data = varifiedRefreshToken.data as JwtPayload;
+  console.log("this is data" ,data);
+
+  const newAccessToken = tokenUtils.getAccessToken({
+    userId: data.userId,
+    role: data.role,
+    name: data.name,
+    email: data.email,
+    status: data.status,
+    isDeleted: data.isDeleted,
+    emailVerified: data.emailVerified,
+  });
+
+  const newRefreshToken = tokenUtils.getRefreshToken({
+      userId: data.userId,
+    role: data.role,
+    name: data.name,
+    email: data.email,
+    status: data.status,
+    isDeleted: data.isDeleted,
+    emailVerified: data.emailVerified,
+  });
+
+  const token = await prisma.session.update({
+    where: {
+      token: sessionToken,
+    },
+    data: {
+      token: sessionToken,
+      expiresAt: new Date(Date.now() + 60 * 60 * 60 * 24 * 1000),
+      updatedAt: new Date(),
+    },
+  });
+  return {
+    accessToken: newAccessToken,
+    refreshToken: newRefreshToken,
+    sessionToken: token.token,
+  };
+};
 
 export const AuthService = {
   registerPatient,
   loginUser,
+  getMe,
+  getNewToken
 };
