@@ -1,13 +1,52 @@
 import { get } from "node:http";
 import { prisma } from "../../lib/prisma";
 import { IEditDoctorPayload } from "./doctor.interface";
-import { Specialty } from "../../../generated/prisma/client";
+import { Doctor, Prisma, Specialty } from "../../../generated/prisma/client";
 import AppError from "../../errorsHelpers/AppError";
 import status from "http-status";
+import { IQueryParams } from "../../interface/querybuilder.interface";
+import { QueryBuilder } from "../../utils/QueryBuilder";
+import {
+  doctorFilterableFields,
+  doctorIncludeConfig,
+  doctorSearchableFields,
+} from "./doctor.constant";
 
-const getAllDoctors = async () => {
-  const doctorsData = await prisma.doctor.findMany();
-  return doctorsData;
+const getAllDoctors = async (query: IQueryParams) => {
+  // const doctorsData = await prisma.doctor.findMany();
+  // return doctorsData;
+  const queryBuilder = new QueryBuilder<
+    Doctor,
+    Prisma.DoctorWhereInput,
+    Prisma.DoctorInclude
+  >(prisma.doctor, query, {
+    searchableFields: doctorSearchableFields,
+    filterableFields: doctorFilterableFields,
+  });
+
+  const result = await queryBuilder
+    .search()
+    .filter()
+    .where({
+      isDeleted: false,
+    })
+    .include({
+      user: true,
+      // specialties: true,
+      specialties: {
+        include: {
+          specialty: true,
+        },
+      },
+    })
+    .dynamicInclude(doctorIncludeConfig)
+    .paginate()
+    .sort()
+    .fields()
+    .execute();
+
+  console.log(result);
+  return result;
 };
 
 const getDoctorById = async (id: string) => {
@@ -73,7 +112,7 @@ const editDoctor = async (id: string, payload: IEditDoctorPayload) => {
 
     if (foundSpecialties.length !== payload.specialties.length) {
       // throw new Error("One or more specialties not found");
-      throw new AppError(status.NOT_FOUND, "One or more specialties not found");  
+      throw new AppError(status.NOT_FOUND, "One or more specialties not found");
     }
   }
 
@@ -124,7 +163,7 @@ const editDoctor = async (id: string, payload: IEditDoctorPayload) => {
     {
       maxWait: 5000,
       timeout: 10000,
-    }
+    },
   );
 
   const doctor = await prisma.doctor.findUnique({
@@ -172,7 +211,6 @@ const editDoctor = async (id: string, payload: IEditDoctorPayload) => {
       },
     },
   });
-
 
   return doctor;
 };
